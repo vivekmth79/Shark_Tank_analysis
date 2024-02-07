@@ -1,0 +1,130 @@
+select * from srk
+
+-- total episodes
+
+select max(Ep_No) from srk
+select count(distinct Ep_No) from srk
+
+-- pitches 
+
+select count(distinct brand) from srk
+
+--pitches converted
+
+select cast(sum(a.converted_not_converted) as float) /cast(count(*) as float) from (
+select Amount_Invested_lakhs , case when Amount_Invested_lakhs>0 then 1 else 0 end as converted_not_converted from srk) a
+
+-- total male
+
+select sum(male) from srk
+
+-- total female
+
+select sum(female) from srk
+
+--gender ratio
+
+select sum(female)/sum(male) from srk
+
+-- total invested amount
+
+select sum(Amount_Invested_lakhs) from srk
+
+-- avg equity taken
+
+select avg(a.Equity_Taken) from
+(select * from srk where Equity_Taken>0) a
+
+--highest deal taken
+
+select max(Amount_Invested_lakhs) from srk 
+
+--higheest equity taken
+
+select max(Equity_Taken) from srk
+
+-- startups having at least women
+
+select sum(a.female_count) startups_having_at_least_women from (
+select Female,case when Female>0 then 1 else 0 end as female_count from srk) a
+
+-- pitches converted having atleast ne women
+
+select * from srk
+
+
+select sum(b.female_count) from(
+
+select case when a.female>0 then 1 else 0 end as female_count ,a.*from (
+(select * from srk where deal!='No Deal')) a)b
+
+-- avg team members
+
+select avg(team_members) from srk
+
+-- amount invested per deal
+
+select avg(a.Amount_Invested_lakhs) amount_invested_per_deal from
+(select * from srk where deal!='No Deal') a
+
+-- avg age group of contestants
+
+select avg_age,count(avg_age) cnt from srk group by avg_age order by cnt desc
+
+-- location group of contestants
+
+select location,count(location) cnt from srk group by location order by cnt desc
+
+-- sector group of contestants
+
+select sector,count(sector) cnt from srk group by sector order by cnt desc
+
+
+--partner deals
+
+select partners,count(partners) cnt from srk  where partners!='-' group by partners order by cnt desc
+
+-- making the matrix
+
+select * from srk
+
+select 'Ashnner' as keyy,count(Ashneer_Amount_Invested) from srk where Ashneer_Amount_Invested is not null
+
+
+select 'Ashnner' as keyy,count(Ashneer_Amount_Invested) from srk where Ashneer_Amount_Invested is not null AND Ashneer_Amount_Invested!=0
+
+SELECT 'Ashneer' as keyy,SUM(C.Ashneer_Amount_Invested),AVG(C.Ashneer_Equity_Taken) 
+FROM (SELECT * FROM srk  WHERE Ashneer_Equity_Taken!=0 AND Ashneer_Equity_Taken IS NOT NULL) C
+
+
+select m.keyy,m.total_deals_present,m.total_deals,n.total_amount_invested,n.avg_equity_taken from
+
+(select a.keyy,a.total_deals_present,b.total_deals from(
+
+select 'Ashneer' as keyy,count(Ashneer_Amount_Invested) total_deals_present from srk where Ashneer_Amount_Invested is not null) a
+
+inner join (
+select 'Ashneer' as keyy,count(Ashneer_Amount_Invested) total_deals from srk 
+where Ashneer_Amount_Invested is not null AND Ashneer_Amount_Invested!=0) b 
+
+on a.keyy=b.keyy) m
+
+inner join 
+
+(SELECT 'Ashneer' as keyy,SUM(C.Ashneer_Amount_Invested) total_amount_invested,
+AVG(C.Ashneer_Equity_Taken) avg_equity_taken
+FROM (SELECT * FROM srk  WHERE Ashneer_Equity_Taken!=0 AND Ashneer_Equity_Taken IS NOT NULL) C) n
+
+on m.keyy=n.keyy
+
+-- which is the startup in which the highest amount has been invested in each domain/sector
+
+
+
+
+select c.* from 
+(select brand,sector,Amount_Invested_lakhs,rank() over(partition by sector order by Amount_Invested_lakhs desc) rnk 
+
+from srk) c
+
+where c.rnk=1
